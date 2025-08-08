@@ -101,9 +101,37 @@ namespace Player.Controller
         internal float SpeedLerpScale => PC._stat.SpeedLerpScale;
         internal IPlayerState State { get { return PC.State; } set { PC.State = value; } }
         internal Transform Transform { get { return PC.transform; } }
-        internal Vector3 Position { get { return PC.transform.position; } set { PC.transform.position = value; }  }
+        internal Vector3 Position { get { return PC.transform.position; } set { PC.transform.position = value; } }
         internal Quaternion Rotation { get { return PC.transform.rotation; } set { PC.transform.rotation = value; } }
-        internal Vector3 LocalScale { get { return PC.transform.localScale;} set { PC.transform.localScale = value; } }
+        internal Vector3 LocalScale { get { return PC.transform.localScale; } set { PC.transform.localScale = value; } }
+        internal int HP
+        {
+            get { return (int)(PC._stat.HP.rectTransform.localScale.x * 100); }
+            set
+            {
+                if (value < 0)
+                    return;
+                var localScale = PC._stat.HP.rectTransform.localScale;
+                float nextHp = (float)(value / 100f);
+                PC._stat.HP.rectTransform.localScale = new Vector3(nextHp, localScale.y, localScale.z);
+                if (localScale.x < 0)
+                    PC._stat.HP.rectTransform.localScale = new Vector3(0, localScale.y, localScale.z);
+            }
+        }
+        internal int Stamina
+        {
+            get { return (int)(PC._stat.Stamina.rectTransform.localScale.x * 100); }
+            set
+            {
+                if (value < 0)
+                    return;
+                var localScale = PC._stat.Stamina.rectTransform.localScale;
+                float nextHp = (float)(value / 100f);
+                PC._stat.Stamina.rectTransform.localScale = new Vector3(nextHp, localScale.y, localScale.z);
+                if (localScale.x < 0)
+                   PC._stat.Stamina.rectTransform.localScale = new Vector3(0, localScale.y, localScale.z);
+            }
+        }
         bool _isJumping = false;
         internal bool IsJumping
         {
@@ -471,7 +499,7 @@ namespace Player.Controller
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
             var speed = Mathf.Lerp(context.Speed, context.WalkSpeed, Time.deltaTime * context.SpeedLerpScale);
-            
+
             HandleInput(context, speed, (ct) =>
             {
                 var reducedSpeed = Mathf.Lerp(context.Speed, 0, Time.deltaTime * context.SpeedLerpScale * 2f);

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerStatController : MonoBehaviour
 {
@@ -17,4 +18,8 @@ public class PlayerStatController : MonoBehaviour
     internal float SprintSpeed;
     [SerializeField]
     internal float SpeedLerpScale;
+    [SerializeField]
+    internal Image HP;
+    [SerializeField]
+    internal Image Stamina;
 }
