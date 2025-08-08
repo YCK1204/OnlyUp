@@ -1,26 +1,10 @@
-using Player.State.Management;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Animations;
 using UnityEngine;
 
-namespace Player.State.Management
+namespace Player.Controller
 {
     public class PlayerMoveController : MonoBehaviour
     {
-        [Range(1f, 200f)]
-        [SerializeField]
-        internal float TurnSpeed;
-        [SerializeField]
-        internal float WalkSpeed;
-        [SerializeField]
-        internal float RunSpeed;
-        [SerializeField]
-        internal float JumpForce;
-        [SerializeField]
-        internal float SprintSpeed;
-        [SerializeField]
-        internal float SpeedLerpScale;
+        internal PlayerStatController _stat;
 
         IPlayerState _curState = PlayerIdleState.Instance;
         internal IPlayerState State
@@ -39,6 +23,9 @@ namespace Player.State.Management
         PlayerStateContext context;
         private void Start()
         {
+            _stat = GetComponent<PlayerStatController>();
+            if (_stat == null)
+                Debug.LogError("플레이터 스탯 없음");
             context = new PlayerStateContext(this);
         }
         private void Update()

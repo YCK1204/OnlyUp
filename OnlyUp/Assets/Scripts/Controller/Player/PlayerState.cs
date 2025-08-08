@@ -1,12 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
-namespace Player.State.Management
+namespace Player.Controller
 {
     internal interface IPlayerState
     {
@@ -33,29 +29,29 @@ namespace Player.State.Management
             {
                 context.Speed = speed;
                 context.Direction = Vector3.up;
-                context.MoveDirection = context.PC.transform.forward;
+                context.MoveDirection = context.Transform.forward;
             });
             DirectionKeyHandler.Add(KeyCode.S, (context, speed) =>
             {
                 context.Speed = speed;
                 context.Direction = Vector3.down;
-                context.MoveDirection = -context.PC.transform.forward;
+                context.MoveDirection = -context.Transform.forward;
             });
             DirectionKeyHandler.Add(KeyCode.A, (context, speed) =>
             {
                 context.Speed = speed;
                 context.Direction = Vector3.up;
-                context.PC.transform.Rotate(Vector3.down * context.PC.TurnSpeed * Time.deltaTime);
-                context.PC.transform.rotation = Quaternion.Euler(0, context.PC.transform.eulerAngles.y, 0);
-                context.MoveDirection = context.PC.transform.forward;
+                context.Transform.Rotate(Vector3.down * context.TurnSpeed * Time.deltaTime);
+                context.Transform.rotation = Quaternion.Euler(0, context.Transform.eulerAngles.y, 0);
+                context.MoveDirection = context.Transform.forward;
             });
             DirectionKeyHandler.Add(KeyCode.D, (context, speed) =>
             {
                 context.Speed = speed;
                 context.Direction = Vector3.up;
-                context.PC.transform.Rotate(Vector3.up * context.PC.TurnSpeed * Time.deltaTime);
-                context.PC.transform.rotation = Quaternion.Euler(0, context.PC.transform.eulerAngles.y, 0);
-                context.MoveDirection = context.PC.transform.forward;
+                context.Transform.Rotate(Vector3.up * context.TurnSpeed * Time.deltaTime);
+                context.Transform.rotation = Quaternion.Euler(0, context.Transform.eulerAngles.y, 0);
+                context.MoveDirection = context.Transform.forward;
             });
         }
         protected virtual void HandleInput(PlayerStateContext context, float speed, Action<PlayerStateContext> elseCallback = null)
@@ -96,7 +92,18 @@ namespace Player.State.Management
     {
         internal Animator Animator { get; set; }
         internal Rigidbody Rigidbody { get; set; }
-        internal PlayerMoveController PC { get; set; }
+        PlayerMoveController PC { get; set; }
+        internal float TurnSpeed => PC._stat.TurnSpeed;
+        internal float WalkSpeed => PC._stat.WalkSpeed;
+        internal float RunSpeed => PC._stat.RunSpeed;
+        internal float JumpForce => PC._stat.JumpForce;
+        internal float SprintSpeed => PC._stat.SprintSpeed;
+        internal float SpeedLerpScale => PC._stat.SpeedLerpScale;
+        internal IPlayerState State { get { return PC.State; } set { PC.State = value; } }
+        internal Transform Transform { get { return PC.transform; } }
+        internal Vector3 Position { get { return PC.transform.position; } set { PC.transform.position = value; }  }
+        internal Quaternion Rotation { get { return PC.transform.rotation; } set { PC.transform.rotation = value; } }
+        internal Vector3 LocalScale { get { return PC.transform.localScale;} set { PC.transform.localScale = value; } }
         bool _isJumping = false;
         internal bool IsJumping
         {
@@ -190,11 +197,11 @@ namespace Player.State.Management
         {
             if (Input.GetKey(KeyCode.Space))
             {
-                context.PC.State = PlayerJumpState.Instance;
+                context.State = PlayerJumpState.Instance;
                 return;
             }
             if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
-                context.PC.State = PlayerWalkState.Instance;
+                context.State = PlayerWalkState.Instance;
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -229,11 +236,11 @@ namespace Player.State.Management
         {
             OnEnterShiftKey = (context) =>
             {
-                context.PC.State = PlayerRunState.Instance;
+                context.State = PlayerRunState.Instance;
             };
             OnJumpKey = (context) =>
             {
-                context.PC.State = PlayerJumpState.Instance;
+                context.State = PlayerJumpState.Instance;
             };
         }
         public int StateId => (int)State;
@@ -251,20 +258,20 @@ namespace Player.State.Management
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
-            var nextSpeed = Mathf.Lerp(context.Speed, context.PC.WalkSpeed, Time.deltaTime * context.PC.SpeedLerpScale);
+            var nextSpeed = Mathf.Lerp(context.Speed, context.WalkSpeed, Time.deltaTime * context.SpeedLerpScale);
             HandleInput(context, nextSpeed, (ct) =>
             {
-                var reducedSpeed = Mathf.Lerp(context.Speed, 0, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                var reducedSpeed = Mathf.Lerp(context.Speed, 0, Time.deltaTime * context.SpeedLerpScale * 2f);
                 context.Speed = reducedSpeed;
 
                 if (context.Speed < .5f)
-                    ct.PC.State = PlayerIdleState.Instance;
+                    ct.State = PlayerIdleState.Instance;
             });
             Move(context);
         }
         void Move(PlayerStateContext context)
         {
-            context.PC.transform.position += context.MoveDirection * context.Speed * Time.deltaTime;
+            context.Position += context.MoveDirection * context.Speed * Time.deltaTime;
         }
         void IPlayerState.OnCollisionEnter(PlayerStateContext context, Collision collision)
         {
@@ -298,20 +305,20 @@ namespace Player.State.Management
             {
                 if (Input.GetKey(KeyCode.S))
                     return;
-                if (context.Speed > context.PC.RunSpeed * .9f)
-                    context.PC.State = PlayerSprintState.Instance;
+                if (context.Speed > context.RunSpeed * .9f)
+                    context.State = PlayerSprintState.Instance;
             };
             OnExitShiftKey = (context) =>
             {
-                var reducedSpeed = Mathf.Lerp(context.Speed, context.PC.WalkSpeed, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                var reducedSpeed = Mathf.Lerp(context.Speed, context.WalkSpeed, Time.deltaTime * context.SpeedLerpScale * 2f);
                 context.Speed = reducedSpeed;
 
-                if (context.Speed < context.PC.WalkSpeed * 1.1)
-                    context.PC.State = PlayerWalkState.Instance;
+                if (context.Speed < context.WalkSpeed * 1.1)
+                    context.State = PlayerWalkState.Instance;
             };
             OnJumpKey = (context) =>
             {
-                context.PC.State = PlayerJumpState.Instance;
+                context.State = PlayerJumpState.Instance;
             };
         }
         public int StateId => (int)State;
@@ -329,15 +336,15 @@ namespace Player.State.Management
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
-            var nextSpeed = Mathf.Lerp(context.Speed, context.PC.RunSpeed, Time.deltaTime * context.PC.SpeedLerpScale);
+            var nextSpeed = Mathf.Lerp(context.Speed, context.RunSpeed, Time.deltaTime * context.SpeedLerpScale);
 
             HandleInput(context, nextSpeed, (ct) =>
             {
-                var reducedSpeed = Mathf.Lerp(context.Speed, context.PC.WalkSpeed, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                var reducedSpeed = Mathf.Lerp(context.Speed, context.WalkSpeed, Time.deltaTime * context.SpeedLerpScale * 2f);
                 context.Speed = reducedSpeed;
 
-                if (context.Speed < context.PC.WalkSpeed * 1.1)
-                    ct.PC.State = PlayerWalkState.Instance;
+                if (context.Speed < context.WalkSpeed * 1.1)
+                    ct.State = PlayerWalkState.Instance;
             });
             Move(context);
         }
@@ -346,7 +353,7 @@ namespace Player.State.Management
         }
         void Move(PlayerStateContext context)
         {
-            context.PC.transform.position += context.MoveDirection * context.Speed * Time.deltaTime;
+            context.Position += context.MoveDirection * context.Speed * Time.deltaTime;
         }
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
@@ -375,15 +382,15 @@ namespace Player.State.Management
         {
             OnExitShiftKey = (context) =>
             {
-                var reducedSpeed = Mathf.Lerp(context.Speed, context.PC.RunSpeed, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                var reducedSpeed = Mathf.Lerp(context.Speed, context.RunSpeed, Time.deltaTime * context.SpeedLerpScale * 2f);
                 context.Speed = reducedSpeed;
 
-                if (context.Speed < context.PC.RunSpeed * 1.1)
-                    context.PC.State = PlayerRunState.Instance;
+                if (context.Speed < context.RunSpeed * 1.1)
+                    context.State = PlayerRunState.Instance;
             };
             OnJumpKey = (context) =>
             {
-                context.PC.State = PlayerJumpState.Instance;
+                context.State = PlayerJumpState.Instance;
             };
         }
         public int StateId => (int)State;
@@ -401,21 +408,21 @@ namespace Player.State.Management
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
-            var nextSpeed = Mathf.Lerp(context.Speed, context.PC.SprintSpeed, Time.deltaTime * context.PC.SpeedLerpScale);
+            var nextSpeed = Mathf.Lerp(context.Speed, context.SprintSpeed, Time.deltaTime * context.SpeedLerpScale);
 
             HandleInput(context, nextSpeed, (ct) =>
             {
-                var reducedSpeed = Mathf.Lerp(context.Speed, context.PC.RunSpeed, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                var reducedSpeed = Mathf.Lerp(context.Speed, context.RunSpeed, Time.deltaTime * context.SpeedLerpScale * 2f);
                 context.Speed = reducedSpeed;
 
-                if (context.Speed < context.PC.RunSpeed * 1.1)
-                    ct.PC.State = PlayerRunState.Instance;
+                if (context.Speed < context.RunSpeed * 1.1)
+                    ct.State = PlayerRunState.Instance;
             });
             Move(context);
         }
         void Move(PlayerStateContext context)
         {
-            context.PC.transform.position += context.MoveDirection * context.Speed * Time.deltaTime;
+            context.Position += context.MoveDirection * context.Speed * Time.deltaTime;
         }
         void IPlayerState.OnCollisionEnter(PlayerStateContext context, Collision collision)
         {
@@ -449,7 +456,7 @@ namespace Player.State.Management
         public int StateId => (int)State;
         void IPlayerState.Enter(PlayerStateContext context)
         {
-            context.Rigidbody.AddForce(Vector3.up * context.PC.JumpForce, ForceMode.Impulse);
+            context.Rigidbody.AddForce(Vector3.up * context.JumpForce, ForceMode.Impulse);
             context.IsJumping = true;
         }
         void IPlayerState.Exit(PlayerStateContext context)
@@ -463,11 +470,11 @@ namespace Player.State.Management
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
-            var speed = Mathf.Lerp(context.Speed, context.PC.WalkSpeed, Time.deltaTime * context.PC.SpeedLerpScale);
+            var speed = Mathf.Lerp(context.Speed, context.WalkSpeed, Time.deltaTime * context.SpeedLerpScale);
             
             HandleInput(context, speed, (ct) =>
             {
-                var reducedSpeed = Mathf.Lerp(context.Speed, 0, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                var reducedSpeed = Mathf.Lerp(context.Speed, 0, Time.deltaTime * context.SpeedLerpScale * 2f);
                 context.Speed = reducedSpeed;
             });
         }
@@ -477,7 +484,7 @@ namespace Player.State.Management
                 Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
             {
                 if (Input.GetKey(KeyCode.LeftShift))
-                    speed = Mathf.Lerp(context.Speed, context.PC.SprintSpeed, Time.deltaTime * context.PC.SpeedLerpScale * 2f);
+                    speed = Mathf.Lerp(context.Speed, context.SprintSpeed, Time.deltaTime * context.SpeedLerpScale * 2f);
 
                 if (Input.GetKey(KeyCode.A))
                     DirectionKeyHandler[KeyCode.A](context, speed);
@@ -496,18 +503,18 @@ namespace Player.State.Management
         }
         void Move(PlayerStateContext context)
         {
-            context.PC.transform.position += context.MoveDirection * context.Speed * Time.deltaTime;
+            context.Position += context.MoveDirection * context.Speed * Time.deltaTime;
         }
         void IPlayerState.OnCollisionEnter(PlayerStateContext context, Collision collision)
         {
-            if (context.Speed > context.PC.RunSpeed)
-                context.PC.State = PlayerSprintState.Instance;
-            else if (context.Speed > context.PC.WalkSpeed)
-                context.PC.State = PlayerRunState.Instance;
+            if (context.Speed > context.RunSpeed)
+                context.State = PlayerSprintState.Instance;
+            else if (context.Speed > context.WalkSpeed)
+                context.State = PlayerRunState.Instance;
             else if (context.Speed > .5f)
-                context.PC.State = PlayerWalkState.Instance;
+                context.State = PlayerWalkState.Instance;
             else
-                context.PC.State = PlayerIdleState.Instance;
+                context.State = PlayerIdleState.Instance;
         }
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
