@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:digitalbourgeois.tistory.com)",
+      "Bash(node:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(ls:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "mcp__gemini__run_gemini"
+    ],
+    "deny": []
+  }
+}
