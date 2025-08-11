@@ -28,19 +28,27 @@ namespace Player.Controller
             DirectionKeyHandler.Add(KeyCode.W, (context, speed) =>
             {
                 context.Speed = speed;
-                context.Direction = Vector3.up;
+
+                Vector3 direction = context.Direction;
+                direction.y = Mathf.Lerp(context.Direction.y, 1, context.SpeedLerpScale * Time.deltaTime);
+                context.Direction = direction;
                 context.MoveDirection = context.Transform.forward;
             });
             DirectionKeyHandler.Add(KeyCode.S, (context, speed) =>
             {
                 context.Speed = speed;
-                context.Direction = Vector3.down;
+                Vector3 direction = context.Direction;
+                float y = Mathf.Lerp(context.Direction.y, -1, context.SpeedLerpScale * Time.deltaTime);
+                direction.y = y;
+                context.Direction = direction;
                 context.MoveDirection = -context.Transform.forward;
             });
             DirectionKeyHandler.Add(KeyCode.A, (context, speed) =>
             {
                 context.Speed = speed;
-                context.Direction = Vector3.up;
+                Vector3 direction = context.Direction;
+                direction.y = Mathf.Lerp(context.Direction.y, 1, context.SpeedLerpScale * Time.deltaTime);
+                context.Direction = direction;
                 context.Transform.Rotate(Vector3.down * context.TurnSpeed * Time.deltaTime);
                 context.Transform.rotation = Quaternion.Euler(0, context.Transform.eulerAngles.y, 0);
                 context.MoveDirection = context.Transform.forward;
@@ -48,7 +56,9 @@ namespace Player.Controller
             DirectionKeyHandler.Add(KeyCode.D, (context, speed) =>
             {
                 context.Speed = speed;
-                context.Direction = Vector3.up;
+                Vector3 direction = context.Direction;
+                direction.y = Mathf.Lerp(context.Direction.y, 1, context.SpeedLerpScale * Time.deltaTime);
+                context.Direction = direction;
                 context.Transform.Rotate(Vector3.up * context.TurnSpeed * Time.deltaTime);
                 context.Transform.rotation = Quaternion.Euler(0, context.Transform.eulerAngles.y, 0);
                 context.MoveDirection = context.Transform.forward;
@@ -481,7 +491,11 @@ namespace Player.Controller
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
-            var nextSpeed = Mathf.Lerp(context.Speed, context.SprintSpeed, Time.deltaTime * context.SpeedLerpScale);
+            float nextSpeed;
+            if (Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
+                nextSpeed = Mathf.Lerp(context.Speed, context.RunSpeed, Time.deltaTime * context.SpeedLerpScale);
+            else
+                nextSpeed = Mathf.Lerp(context.Speed, context.SprintSpeed, Time.deltaTime * context.SpeedLerpScale);
 
             HandleInput(context, nextSpeed, (ct) =>
             {
