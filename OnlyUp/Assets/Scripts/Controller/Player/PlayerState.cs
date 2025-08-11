@@ -93,6 +93,7 @@ namespace Player.Controller
         internal Animator Animator { get; set; }
         internal Rigidbody Rigidbody { get; set; }
         PlayerMoveController PC { get; set; }
+        internal bool CanJump => PC.CanJump();
         internal float TurnSpeed => PC._stat.TurnSpeed;
         internal float WalkSpeed => PC._stat.WalkSpeed;
         internal float RunSpeed => PC._stat.RunSpeed;
@@ -129,7 +130,7 @@ namespace Player.Controller
                 float nextHp = (float)(value / 100f);
                 PC._stat.Stamina.rectTransform.localScale = new Vector3(nextHp, localScale.y, localScale.z);
                 if (localScale.x < 0)
-                   PC._stat.Stamina.rectTransform.localScale = new Vector3(0, localScale.y, localScale.z);
+                    PC._stat.Stamina.rectTransform.localScale = new Vector3(0, localScale.y, localScale.z);
             }
         }
         bool _isJumping = false;
@@ -156,6 +157,7 @@ namespace Player.Controller
                 Animator.SetBool("IsFalling", _isFalling);
             }
         }
+        internal float JumpCheckInterval = 0.1f;
 
         float _speed = 0;
         internal Vector3 MoveDirection { get; set; }
@@ -214,6 +216,7 @@ namespace Player.Controller
         {
         }
         public int StateId => (int)State;
+        float _lastJumpCheckTime = 0;
         void IPlayerState.Enter(PlayerStateContext context)
         {
             context.Speed = 0f;
@@ -223,13 +226,20 @@ namespace Player.Controller
         }
         void IPlayerState.Update(PlayerStateContext context)
         {
-            if (Input.GetKey(KeyCode.Space))
+            if (Input.GetKey(KeyCode.Space) && context.CanJump)
             {
+                context.Rigidbody.AddForce(Vector3.up * context.JumpForce, ForceMode.Impulse);
                 context.State = PlayerJumpState.Instance;
                 return;
             }
             if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
                 context.State = PlayerWalkState.Instance;
+            if (Time.time - _lastJumpCheckTime > context.JumpCheckInterval)
+            {
+                _lastJumpCheckTime = Time.time;
+                if (!context.CanJump)
+                    context.State = PlayerJumpState.Instance;
+            }
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -240,6 +250,8 @@ namespace Player.Controller
 
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
+            if (!context.CanJump)
+                context.State = PlayerJumpState.Instance;
         }
 
         void IPlayerState.OnTriggetEnter(PlayerStateContext context, Collider other)
@@ -249,7 +261,7 @@ namespace Player.Controller
         void IPlayerState.OnTriggetExit(PlayerStateContext context, Collider other)
         {
 
-        }
+        }   
     }
     internal class PlayerWalkState : BasePlayerInputHandler, IPlayerState
     {
@@ -268,7 +280,11 @@ namespace Player.Controller
             };
             OnJumpKey = (context) =>
             {
-                context.State = PlayerJumpState.Instance;
+                if (context.CanJump)
+                {
+                    context.Rigidbody.AddForce(Vector3.up * context.JumpForce, ForceMode.Impulse);
+                    context.State = PlayerJumpState.Instance;
+                }
             };
         }
         public int StateId => (int)State;
@@ -280,9 +296,15 @@ namespace Player.Controller
         {
         }
 
+        float _lastJumpCheckTime = 0;
         void IPlayerState.Update(PlayerStateContext context)
         {
-
+            if (Time.time - _lastJumpCheckTime > context.JumpCheckInterval)
+            {
+                _lastJumpCheckTime = Time.time;
+                if (!context.CanJump)
+                    context.State = PlayerJumpState.Instance;
+            }
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -306,6 +328,8 @@ namespace Player.Controller
         }
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
+            if (!context.CanJump)
+                context.State = PlayerJumpState.Instance;
         }
 
         void IPlayerState.OnTriggetEnter(PlayerStateContext context, Collider other)
@@ -316,7 +340,7 @@ namespace Player.Controller
         void IPlayerState.OnTriggetExit(PlayerStateContext context, Collider other)
         {
 
-        }
+        }   
     }
     internal class PlayerRunState : BasePlayerInputHandler, IPlayerState
     {
@@ -346,7 +370,11 @@ namespace Player.Controller
             };
             OnJumpKey = (context) =>
             {
-                context.State = PlayerJumpState.Instance;
+                if (context.CanJump)
+                {
+                    context.Rigidbody.AddForce(Vector3.up * context.JumpForce, ForceMode.Impulse);
+                    context.State = PlayerJumpState.Instance;
+                }
             };
         }
         public int StateId => (int)State;
@@ -357,10 +385,15 @@ namespace Player.Controller
         void IPlayerState.Exit(PlayerStateContext context)
         {
         }
-
+        float _lastJumpCheckTime = 0;
         void IPlayerState.Update(PlayerStateContext context)
         {
-
+            if (Time.time - _lastJumpCheckTime > context.JumpCheckInterval)
+            {
+                _lastJumpCheckTime = Time.time;
+                if (!context.CanJump)
+                    context.State = PlayerJumpState.Instance;
+            }
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -385,6 +418,8 @@ namespace Player.Controller
         }
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
+            if (!context.CanJump)
+                context.State = PlayerJumpState.Instance;
         }
 
         void IPlayerState.OnTriggetEnter(PlayerStateContext context, Collider other)
@@ -395,7 +430,7 @@ namespace Player.Controller
         void IPlayerState.OnTriggetExit(PlayerStateContext context, Collider other)
         {
 
-        }
+        }   
     }
     internal class PlayerSprintState : BasePlayerInputHandler, IPlayerState
     {
@@ -418,7 +453,11 @@ namespace Player.Controller
             };
             OnJumpKey = (context) =>
             {
-                context.State = PlayerJumpState.Instance;
+                if (context.CanJump)
+                {
+                    context.Rigidbody.AddForce(Vector3.up * context.JumpForce, ForceMode.Impulse);
+                    context.State = PlayerJumpState.Instance;
+                }
             };
         }
         public int StateId => (int)State;
@@ -430,9 +469,15 @@ namespace Player.Controller
         void IPlayerState.Exit(PlayerStateContext context)
         {
         }
-
+        float _lastJumpCheckTime = 0;
         void IPlayerState.Update(PlayerStateContext context)
         {
+            if (Time.time - _lastJumpCheckTime > context.JumpCheckInterval)
+            {
+                _lastJumpCheckTime = Time.time;
+                if (!context.CanJump)
+                    context.State = PlayerJumpState.Instance;
+            }
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -458,6 +503,8 @@ namespace Player.Controller
 
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
+            if (!context.CanJump)
+                context.State = PlayerJumpState.Instance;
         }
 
         void IPlayerState.OnTriggetEnter(PlayerStateContext context, Collider other)
@@ -467,7 +514,7 @@ namespace Player.Controller
         void IPlayerState.OnTriggetExit(PlayerStateContext context, Collider other)
         {
 
-        }
+        }   
     }
     internal class PlayerJumpState : BasePlayerInputHandler, IPlayerState
     {
@@ -484,7 +531,6 @@ namespace Player.Controller
         public int StateId => (int)State;
         void IPlayerState.Enter(PlayerStateContext context)
         {
-            context.Rigidbody.AddForce(Vector3.up * context.JumpForce, ForceMode.Impulse);
             context.IsJumping = true;
         }
         void IPlayerState.Exit(PlayerStateContext context)
@@ -535,14 +581,17 @@ namespace Player.Controller
         }
         void IPlayerState.OnCollisionEnter(PlayerStateContext context, Collision collision)
         {
-            if (context.Speed > context.RunSpeed)
-                context.State = PlayerSprintState.Instance;
-            else if (context.Speed > context.WalkSpeed)
-                context.State = PlayerRunState.Instance;
-            else if (context.Speed > .5f)
-                context.State = PlayerWalkState.Instance;
-            else
-                context.State = PlayerIdleState.Instance;
+            if (context.CanJump)
+            {
+                if (context.Speed > context.RunSpeed)
+                    context.State = PlayerSprintState.Instance;
+                else if (context.Speed > context.WalkSpeed)
+                    context.State = PlayerRunState.Instance;
+                else if (context.Speed > .5f)
+                    context.State = PlayerWalkState.Instance;
+                else
+                    context.State = PlayerIdleState.Instance;
+            }
         }
         void IPlayerState.OnCollisionExit(PlayerStateContext context, Collision collision)
         {
@@ -556,6 +605,6 @@ namespace Player.Controller
         void IPlayerState.OnTriggetExit(PlayerStateContext context, Collider other)
         {
 
-        }
+        }   
     }
 }
