@@ -33,6 +33,7 @@ namespace Player.Controller
                 Debug.LogError("플레이터 스탯 없음");
             context = new PlayerStateContext(this);
         }
+
         internal bool CanJump()
         {
             var bounds = _boxCollider.bounds;
@@ -55,8 +56,11 @@ namespace Player.Controller
             // 발바닥 box collider의 8방향 체크
             foreach (var point in checkPoints)
             {
-                if (Physics.Raycast(point, Vector3.down, 0.1f, layer))
-                    return true;
+                if (Physics.Raycast(point, Vector3.down, out var hit, 0.1f, layer))
+                {
+                    if (hit.normal.y > 0.5f) // 바닥이 수평인 경우
+                        return true; // 점프 가능
+                }
             }
 
             return false;

@@ -207,9 +207,9 @@ namespace Player.Controller
             Animator = pc.GetComponent<Animator>();
             Rigidbody = pc.GetComponent<Rigidbody>();
             if (Animator == null)
-                Debug.LogError("ÇÃ·¹ÀÌ¾î ¾Ö´Ï¸ŞÀÌÅÍ ¾øÀ½");
+                Debug.LogError("í”Œë ˆì´ì–´ ì• ë‹ˆë©”ì´í„° ì—†ìŒ");
             if (Rigidbody == null)
-                Debug.LogError("ÇÃ·¹ÀÌ¾î ¸®Áöµå¹Ùµğ ¾øÀ½");
+                Debug.LogError("í”Œë ˆì´ì–´ ë¦¬ì§€ë“œë°”ë”” ì—†ìŒ");
             PC = pc;
         }
     }
