@@ -1,3 +1,4 @@
+using Player.Controller;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,19 +8,45 @@ public class PlayerStatController : MonoBehaviour
 {
     [Range(1f, 200f)]
     [SerializeField]
-    internal float TurnSpeed;
+    float _TurnSpeed;
     [SerializeField]
-    internal float WalkSpeed;
+    float _WalkSpeed;
     [SerializeField]
-    internal float RunSpeed;
+    float _RunSpeed;
     [SerializeField]
-    internal float JumpForce;
+    float _JumpForce;
     [SerializeField]
-    internal float SprintSpeed;
+    float _SprintSpeed;
     [SerializeField]
-    internal float SpeedLerpScale;
+    float _SpeedLerpScale;
     [SerializeField]
-    internal Image HP;
+    Image _HP;
     [SerializeField]
-    internal Image Stamina;
+    Image _Stamina;
+    internal float TurnSpeed => _TurnSpeed;
+    internal float WalkSpeed => _WalkSpeed;
+    internal float RunSpeed => _RunSpeed;
+    internal float JumpForce => _JumpForce;
+    internal float SprintSpeed => _SprintSpeed;
+    internal float SpeedLerpScale => _SpeedLerpScale;
+    internal float HP
+    {
+        get { return _HP.rectTransform.localScale.x; } 
+        set 
+        {
+            var localScale = _HP.rectTransform.localScale;
+            localScale.x = Mathf.Clamp(value, 0, 1);
+            _HP.rectTransform.localScale = localScale; 
+        } 
+    }
+    internal float Stamina
+    {
+        get { return _Stamina.rectTransform.localScale.x; }
+        set
+        {
+            var localScale = _Stamina.rectTransform.localScale;
+            localScale.x = Mathf.Clamp(value, 0, 1);
+            _Stamina.rectTransform.localScale = localScale;
+        }
+    }
 }

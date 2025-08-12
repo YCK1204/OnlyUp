@@ -36,7 +36,7 @@ namespace Player.Controller
 
         internal bool CanJump()
         {
-            if (_stat.Stamina.rectTransform.localScale.x < .1f)
+            if (_stat.Stamina < .1f)
                 return false;
             return IsGrounded();
         }
@@ -59,20 +59,32 @@ namespace Player.Controller
                 new Vector3(center.x, min.y + 0.05f, max.z),
                 new Vector3(max.x, min.y + 0.05f, max.z)
             };
+
             // 발바닥 box collider의 8방향 체크
             foreach (var point in checkPoints)
             {
                 if (Physics.Raycast(point, Vector3.down, out var hit, 0.1f, layer))
-                {
-                    if (hit.normal.y > 0.5f) // 바닥이 수평인 경우
-                        return true; // 점프 가능
-                }
+                    return true;
             }
 
             return false;
         }
         private void Update()
         {
+            switch (State)
+            {
+                case PlayerIdleState:
+                case PlayerWalkState:
+                    _stat.Stamina += .001f;
+                    break;
+                case PlayerRunState:
+                    _stat.Stamina -= .001f;
+                    break;
+                case PlayerSprintState:
+                    _stat.Stamina -= .002f;
+                    break;
+            }
+
             _curState.Update(context);
         }
         private void OnCollisionEnter(Collision collision)

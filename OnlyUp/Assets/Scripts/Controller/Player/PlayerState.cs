@@ -6,7 +6,6 @@ namespace Player.Controller
 {
     internal interface IPlayerState
     {
-        public int StateId { get; }
         internal void Enter(PlayerStateContext context);
         internal void Exit(PlayerStateContext context);
         internal void Update(PlayerStateContext context);
@@ -118,23 +117,13 @@ namespace Player.Controller
         internal Vector3 LocalScale { get { return PC.transform.localScale; } set { PC.transform.localScale = value; } }
         internal float HP
         {
-            get { return PC._stat.HP.rectTransform.localScale.x; }
-            set
-            {
-                var localScale = PC._stat.HP.rectTransform.localScale;
-                localScale.x = Mathf.Clamp(value, 0, 1f);
-                PC._stat.HP.rectTransform.localScale = localScale;
-            }
+            get { return PC._stat.HP; }
+            set { PC._stat.HP = value; }
         }
         internal float Stamina
         {
-            get { return PC._stat.Stamina.rectTransform.localScale.x; }
-            set
-            {
-                var localScale = PC._stat.Stamina.rectTransform.localScale;
-                localScale.x = Mathf.Clamp(value, 0, 1f);
-                PC._stat.Stamina.rectTransform.localScale = localScale;
-            }
+            get { return PC._stat.Stamina; }
+            set { PC._stat.Stamina = value; }
         }
         bool _isJumping = false;
         internal bool IsJumping
@@ -209,21 +198,13 @@ namespace Player.Controller
     }
     internal class PlayerIdleState : IPlayerState
     {
-        static PlayerIdleState _instance = new PlayerIdleState();
-        public static IPlayerState Instance { get { return _instance; } }
-        enum IdleState
-        {
-            IdleDefault,
-        }
-        IdleState State = IdleState.IdleDefault;
+        public static IPlayerState Instance { get; } = new PlayerIdleState();
         public PlayerIdleState()
         {
         }
-        public int StateId => (int)State;
         float _lastJumpCheckTime = 0;
         void IPlayerState.Enter(PlayerStateContext context)
         {
-            context.Speed = 0f;
         }
         void IPlayerState.Exit(PlayerStateContext context)
         {
@@ -245,8 +226,6 @@ namespace Player.Controller
                 if (!context.IsGrounded)
                     context.State = PlayerJumpState.Instance;
             }
-            var stamina = context.Stamina;
-            context.Stamina += .001f;
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -270,13 +249,7 @@ namespace Player.Controller
     }
     internal class PlayerWalkState : BasePlayerInputHandler, IPlayerState
     {
-        static PlayerWalkState _instance = new PlayerWalkState();
-        public static IPlayerState Instance { get { return _instance; } }
-        enum WalkState
-        {
-            StateDefault,
-        }
-        WalkState State = WalkState.StateDefault;
+        public static IPlayerState Instance { get; } = new PlayerWalkState();
         public PlayerWalkState()
         {
             OnEnterShiftKey = (context) =>
@@ -293,7 +266,6 @@ namespace Player.Controller
                 }
             };
         }
-        public int StateId => (int)State;
         void IPlayerState.Enter(PlayerStateContext context)
         {
         }
@@ -311,7 +283,6 @@ namespace Player.Controller
                 if (!context.IsGrounded)
                     context.State = PlayerJumpState.Instance;
             }
-            context.Stamina += .001f;
         }
         void IPlayerState.FixedUpdate(PlayerStateContext context)
         {
@@ -351,13 +322,7 @@ namespace Player.Controller
     }
     internal class PlayerRunState : BasePlayerInputHandler, IPlayerState
     {
-        static PlayerRunState _instance = new PlayerRunState();
-        public static IPlayerState Instance { get { return _instance; } }
-        enum RunState
-        {
-            StateDefault,
-        }
-        RunState State = RunState.StateDefault;
+        public static IPlayerState Instance { get; } = new PlayerRunState();
         public PlayerRunState()
         {
             OnEnterShiftKey = (context) =>
@@ -385,7 +350,6 @@ namespace Player.Controller
                 }
             };
         }
-        public int StateId => (int)State;
         void IPlayerState.Enter(PlayerStateContext context)
         {
         }
@@ -396,7 +360,6 @@ namespace Player.Controller
         float _lastJumpCheckTime = 0;
         void IPlayerState.Update(PlayerStateContext context)
         {
-            context.Stamina -= .001f;
             if (context.Stamina <= 0)
                 context.State = PlayerWalkState.Instance;
 
@@ -444,13 +407,7 @@ namespace Player.Controller
     }
     internal class PlayerSprintState : BasePlayerInputHandler, IPlayerState
     {
-        static PlayerSprintState _instance = new PlayerSprintState();
-        public static IPlayerState Instance { get { return _instance; } }
-        enum SprintState
-        {
-            StateDefault,
-        }
-        SprintState State = SprintState.StateDefault;
+        public static IPlayerState Instance { get; } = new PlayerSprintState();
         public PlayerSprintState()
         {
             OnExitShiftKey = (context) =>
@@ -471,7 +428,6 @@ namespace Player.Controller
                 }
             };
         }
-        public int StateId => (int)State;
         void IPlayerState.Enter(PlayerStateContext context)
         {
         }
@@ -482,7 +438,6 @@ namespace Player.Controller
         float _lastJumpCheckTime = 0;
         void IPlayerState.Update(PlayerStateContext context)
         {
-            context.Stamina -= .002f;
             if (context.Stamina <= 0)
                 context.State = PlayerRunState.Instance;
             if (Time.time - _lastJumpCheckTime > context.JumpCheckInterval)
@@ -533,17 +488,10 @@ namespace Player.Controller
     }
     internal class PlayerJumpState : BasePlayerInputHandler, IPlayerState
     {
-        static PlayerJumpState _instance = new PlayerJumpState();
-        public static IPlayerState Instance { get { return _instance; } }
-        enum JumpState
-        {
-            StateDefault,
-        }
-        JumpState State = JumpState.StateDefault;
+        public static IPlayerState Instance { get; } = new PlayerJumpState();
         public PlayerJumpState()
         {
         }
-        public int StateId => (int)State;
         void IPlayerState.Enter(PlayerStateContext context)
         {
             context.IsJumping = true;
