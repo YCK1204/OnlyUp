@@ -36,6 +36,12 @@ namespace Player.Controller
 
         internal bool CanJump()
         {
+            if (_stat.Stamina.rectTransform.localScale.x < .1f)
+                return false;
+            return IsGrounded();
+        }
+        internal bool IsGrounded()
+        {
             var bounds = _boxCollider.bounds;
             var min = bounds.min;
             var max = bounds.max;
