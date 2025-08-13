@@ -163,9 +163,9 @@ namespace Player.Controller
                     return;
                 var prevSpeed = _speed;
                 _speed = value;
-                if (_speed == 0)
+                if (_speed < 3f)
                     Animator.SetBool("IsMoving", false);
-                else if (prevSpeed > 0 && _speed > 0)
+                else if (prevSpeed > 3f && _speed > 3f)
                     Animator.SetBool("IsMoving", true);
                 Animator.SetFloat("Speed", _speed);
             }

@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cc174eb1aeb0374ab08685483bdb1ee, type: 3}
   m_Name: PotionData
   m_EditorClassIdentifier: 
-  ObjectName: 
-  Summary: 
-  EffectValue: 0
-  Usable: 0
-  healAmount: 0
-  duration: 0
-  tickCount: 0
+  ObjectName: "\uD558\uAE09 HP \uD3EC\uC158"
+  Summary: "3\uCD08\uAC04 HP\uB97C 30 \uD68C\uBCF5\uD569\uB2C8\uB2E4."
+  Usable: 1
+  healAmount: 30
+  duration: 3
+  interval: 0.3
   potionType: 0
