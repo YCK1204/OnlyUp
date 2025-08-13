@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8cc174eb1aeb0374ab08685483bdb1ee, type: 3}
-  m_Name: PotionData
+  m_Name: HpPotionData
   m_EditorClassIdentifier: 
   ObjectName: "\uD558\uAE09 HP \uD3EC\uC158"
   Summary: "3\uCD08\uAC04 HP\uB97C 30 \uD68C\uBCF5\uD569\uB2C8\uB2E4."
