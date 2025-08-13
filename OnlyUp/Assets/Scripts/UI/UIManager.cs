@@ -12,8 +12,15 @@ public class UIManager : MonoBehaviour
     InteractableObject _currentObject;
     private void Start()
     {
-        Manager.UI = this;
-        DontDestroyOnLoad(gameObject);
+        if (Manager.UI == null)
+        {
+            Manager.UI = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
     public void ShowObjectSummary(InteractableObject obj)
     {
@@ -27,5 +34,10 @@ public class UIManager : MonoBehaviour
             ObjectUI.Hide();
             _currentObject = null;
         }
+    }
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.E) && _currentObject != null)
+            _currentObject.Use();
     }
 }

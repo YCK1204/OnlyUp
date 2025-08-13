@@ -9,10 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2842f28e7b311b4b8809d48922c283b, type: 3}
-  m_Name: Apple
+  m_Script: {fileID: 11500000, guid: 8cc174eb1aeb0374ab08685483bdb1ee, type: 3}
+  m_Name: PotionData
   m_EditorClassIdentifier: 
-  ObjectName: "\uC751\uC560\uC785\uB2C8\uB2E4"
-  Summary: "\uD750\uC5D0"
+  ObjectName: 
+  Summary: 
   EffectValue: 0
-  Usable: 1
+  Usable: 0
+  healAmount: 0
+  duration: 0
+  tickCount: 0
+  potionType: 0

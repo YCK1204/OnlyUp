@@ -1,19 +1,15 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class InteractableObject : MonoBehaviour
+public abstract class InteractableObject : MonoBehaviour
 {
     public InteractableObjectData Data;
     void Start()
     {
         if (Data == null)
-        {
             Debug.LogError("InteractableObjectData is not assigned.");
-        }
+        Init();
     }
+    protected virtual void Init() { }
     private void OnMouseEnter()
     {
         Manager.UI.ShowObjectSummary(this);
@@ -22,4 +18,5 @@ public class InteractableObject : MonoBehaviour
     {
         Manager.UI.HideObjectSummary();
     }
+    public abstract void Use();
 }
