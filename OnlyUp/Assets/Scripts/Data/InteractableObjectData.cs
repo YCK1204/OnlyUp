@@ -4,7 +4,8 @@ using Player.Controller;
 
 #if UNITY_EDITOR
 using UnityEditor;
-public abstract class InteractableObjectData : ScriptableObject
+[CreateAssetMenu(fileName = "DefaultData", menuName = "ScriptableObjects/Interactables/Default", order = 1)]
+public class InteractableObjectData : ScriptableObject
 {
     [SerializeField]
     string ObjectName;
@@ -15,6 +16,5 @@ public abstract class InteractableObjectData : ScriptableObject
     [SerializeField]
     bool Usable;
     public bool IsUsable => Usable;
-    public abstract void Use(PlayerController player);
 }
 #endif

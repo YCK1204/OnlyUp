@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class InteractableObject : MonoBehaviour
+public class InteractableObject : MonoBehaviour
 {
     public InteractableObjectData Data;
     void Start()
@@ -18,5 +18,5 @@ public abstract class InteractableObject : MonoBehaviour
     {
         Manager.UI.HideObjectSummary();
     }
-    public abstract void Use();
+    public virtual void Use() { }
 }

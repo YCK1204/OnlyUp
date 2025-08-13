@@ -24,9 +24,5 @@ public class PotionData : InteractableObjectData
     [SerializeField]
     private PotionType potionType;
     public PotionType Type => potionType;
-    public override void Use(PlayerController player)
-    {
-        player.UsePotion(this);
-    }
 }
 #endif
